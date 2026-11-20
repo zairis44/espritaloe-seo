@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { readJson, writeJson, sleep, fetchText } from './util.mjs';
+import { readJson, writeJson, fetchText } from './util.mjs';
 import { parseSitemap } from './sitemaps.mjs';
 import { getAccessToken } from './gsc.mjs';
 
@@ -30,6 +30,7 @@ async function siteUrls(domain) {
 async function inspect(token, siteUrl, url) {
   const res = await fetch(ENDPOINT, {
     method: 'POST',
+    signal: AbortSignal.timeout(30000),
     headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
     body: JSON.stringify({ inspectionUrl: url, siteUrl, languageCode: 'fr-FR' }),
   });
@@ -65,27 +66,35 @@ export async function collectIndexation({ settings, dataDir, env, today, log }) 
 
   const file = path.join(dataDir, 'gsc', 'indexation.json');
   const store = readJson(file, { pages: {}, changements: [] });
-  const pages = {};
+  // On garde les résultats précédents des pages encore au sitemap ; les pages
+  // jamais vérifiées ou vérifiées il y a le plus longtemps passent en premier.
+  const pages = Object.fromEntries(urls.filter((u) => store.pages[u]).map((u) => [u, store.pages[u]]));
+  const file_attente = [...urls].sort((a, b) => (pages[a]?.verifie || '').localeCompare(pages[b]?.verifie || ''));
+  const BUDGET_MS = 5 * 60 * 1000; // 5 minutes par nuit au plus : le reste passe la nuit suivante
+  const debut = Date.now();
   let erreurs = 0;
   let reussites = 0;
-  for (const url of urls) {
-    try {
-      pages[url] = await inspect(token, property, url);
-      reussites++;
-    } catch (e) {
-      erreurs++;
-      if (store.pages[url]) pages[url] = { ...store.pages[url], erreur: e.message };
-      if (erreurs >= 5 && reussites === 0) throw new Error(`inspection impossible : ${e.message}`);
+  const travail = async () => {
+    while (file_attente.length && Date.now() - debut < BUDGET_MS) {
+      const url = file_attente.shift();
+      const avant = pages[url]?.verdict;
+      try {
+        pages[url] = { ...(await inspect(token, property, url)), verifie: today };
+        reussites++;
+      } catch (e) {
+        erreurs++;
+        if (pages[url]) pages[url] = { ...pages[url], erreur: e.message };
+        if (erreurs >= 5 && reussites === 0) throw new Error(`inspection impossible : ${e.message}`);
+      }
+      const apres = pages[url]?.verdict;
+      if (avant && apres && avant !== apres) store.changements.push([today, url, avant, apres]);
     }
-    const avant = store.pages[url]?.verdict;
-    const apres = pages[url]?.verdict;
-    if (avant && apres && avant !== apres) store.changements.push([today, url, avant, apres]);
-    await sleep(150);
-  }
+  };
+  await Promise.all([travail(), travail(), travail()]);
   store.date = today;
   store.pages = pages;
   store.changements = store.changements.slice(-200);
   writeJson(file, store);
   const indexees = Object.values(pages).filter((p) => p.verdict === 'PASS').length;
-  return { pages: urls.length, indexees, nonIndexees: urls.length - indexees, erreurs };
+  return { pages: urls.length, verifiees: reussites, restantes: file_attente.length, indexees, nonIndexees: Object.keys(pages).length - indexees, erreurs };
 }

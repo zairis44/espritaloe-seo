@@ -19,6 +19,22 @@
     {
       "domain": "www.ghaloe.com",
       "label": "ghaloe"
+    },
+    {
+      "domain": "www.aloeprevention.fr",
+      "label": "aloeprevention"
+    },
+    {
+      "domain": "www.aloeforeverfans.fr",
+      "label": "aloeforeverfans"
+    },
+    {
+      "domain": "www.myaloe.fr",
+      "label": "myaloe"
+    },
+    {
+      "domain": "boutique.ghaloe.com",
+      "label": "ghaloe (boutique)"
     }
   ],
   "suggest": {

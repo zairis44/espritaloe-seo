@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseSitemap, extractTitle, decodeXml } from '../scripts/lib/sitemaps.mjs';
+import { parseSitemap, extractTitle, decodeXml, extractLinks } from '../scripts/lib/sitemaps.mjs';
 import { parseSuggest } from '../scripts/lib/suggest.mjs';
 import { norm, dayRange, addDays } from '../scripts/lib/util.mjs';
 
@@ -55,4 +55,10 @@ test('normalisation des requêtes', () => {
 test('dates', () => {
   assert.deepEqual(dayRange('2026-02-27', '2026-03-02'), ['2026-02-27', '2026-02-28', '2026-03-01', '2026-03-02']);
   assert.equal(addDays('2026-01-01', -1), '2025-12-31');
+});
+
+test('liens internes (repli sans sitemap)', () => {
+  const html = `<a href="/produit/aloe-gel">x</a><a href='https://shop.fr/blog/c9#top'>y</a>
+<a href="https://autre.fr/z">z</a><a href="/img/a.jpg">i</a><a href="/panier">p</a><a href="/?add=1&amp;id=2">a</a>`;
+  assert.deepEqual(extractLinks(html, 'https://shop.fr/'), ['https://shop.fr/produit/aloe-gel', 'https://shop.fr/blog/c9']);
 });

@@ -55,7 +55,8 @@ async function discover(domain, log) {
     log(`  robots.txt illisible : ${e.message}`);
   }
   if (found.length) return [...new Set(found)];
-  for (const p of ['/sitemap.xml', '/sitemap_index.xml', '/wp-sitemap.xml']) {
+  // Emplacements courants : générique, WordPress/Yoast, PrestaShop (module gsitemap)
+  for (const p of ['/sitemap.xml', '/sitemap_index.xml', '/wp-sitemap.xml', '/1_index_sitemap.xml', '/1_fr_0_sitemap.xml', '/sitemap_fr.xml']) {
     try {
       const r = await fetchText(base + p, { retries: 1 });
       if (r.ok && parseSitemap(r.text).type !== 'unknown') return [base + p];
@@ -102,6 +103,57 @@ async function crawlSitemaps(roots, log) {
   return { urls, sitemaps: [...seen], errors };
 }
 
+const SKIP = /\.(jpe?g|png|gif|webp|svg|ico|css|js|pdf|zip|mp4|xml|json|woff2?)(\?|$)|\/(cart|panier|login|connexion|mon-compte|my-account|order|commande|search|recherche|admin|wp-admin|feed)(\/|\?|$)|[?&](add|order|orderby|q|s|search_query|id_currency|page|p)=/i;
+
+/** Liens internes d'une page HTML (même hôte, sans ancres ni fichiers). */
+export function extractLinks(html, base) {
+  const host = new URL(base).hostname;
+  const out = new Set();
+  for (const m of html.matchAll(/<a\s[^>]*href\s*=\s*["']([^"'#]+)/gi)) {
+    try {
+      const u = new URL(decodeXml(m[1]), base);
+      if (u.hostname !== host || !/^https?:$/.test(u.protocol)) continue;
+      u.hash = '';
+      const href = u.toString();
+      if (!SKIP.test(href)) out.add(href);
+    } catch {
+      /* lien invalide */
+    }
+  }
+  return [...out];
+}
+
+/** Repli quand un site n'a pas de sitemap : accueil + pages liées depuis l'accueil (60 pages au plus). */
+async function crawlLinks(domain, log) {
+  const start = `https://${domain}/`;
+  const urls = new Map();
+  const errors = [];
+  const queue = [{ url: start, depth: 0 }];
+  const seen = new Set();
+  while (queue.length && seen.size < 60) {
+    const { url, depth } = queue.shift();
+    if (seen.has(url)) continue;
+    seen.add(url);
+    try {
+      const r = await fetchText(url, { retries: 1 });
+      if (!r.ok) {
+        errors.push(`${url} → HTTP ${r.status}`);
+        continue;
+      }
+      urls.set(url, { loc: url, lastmod: null });
+      for (const link of extractLinks(r.text, r.url)) {
+        if (!urls.has(link)) urls.set(link, { loc: link, lastmod: null });
+        if (depth < 1) queue.push({ url: link, depth: depth + 1 });
+      }
+    } catch (e) {
+      errors.push(e.message);
+    }
+    await sleep(500);
+  }
+  log(`  pas de sitemap : ${urls.size} pages trouvées en suivant les liens`);
+  return { urls, sitemaps: ['(pas de sitemap : exploration des liens depuis l’accueil)'], errors };
+}
+
 /**
  * Met à jour data/competitors/<domaine>.json.
  * Format : { domain, label, baselineDate, lastCheck, sitemaps, errors, history: [[jour, total, nouvelles, retirées]],
@@ -114,8 +166,8 @@ export async function collectCompetitor({ competitor, dataDir, today, log }) {
   store.label = label || domain;
 
   const roots = await discover(domain, log);
-  if (!roots.length) throw new Error(`${domain} : aucun sitemap trouvé`);
-  const { urls, sitemaps, errors } = await crawlSitemaps(roots, log);
+  // Pas de sitemap : on explore les liens internes du site (2 niveaux depuis l'accueil)
+  const { urls, sitemaps, errors } = roots.length ? await crawlSitemaps(roots, log) : await crawlLinks(domain, log);
   if (!urls.size) throw new Error(`${domain} : sitemap vide ou illisible (${errors[0] || 'aucune URL'})`);
 
   const baseline = !store.baselineDate;

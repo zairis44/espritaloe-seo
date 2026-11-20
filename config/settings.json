@@ -4,10 +4,22 @@
   "historyDays": 480,
   "queryHistoryDays": 90,
   "competitors": [
-    { "domain": "www.aloe-vera-pour-tous.com", "label": "aloe-vera-pour-tous" },
-    { "domain": "aloeveragel.fr", "label": "aloeveragel" },
-    { "domain": "www.aloeveraforever.fr", "label": "aloeveraforever" },
-    { "domain": "www.ghaloe.com", "label": "ghaloe" }
+    {
+      "domain": "www.aloe-vera-pour-tous.com",
+      "label": "aloe-vera-pour-tous"
+    },
+    {
+      "domain": "aloeveragel.fr",
+      "label": "aloeveragel"
+    },
+    {
+      "domain": "www.aloeveraforever.fr",
+      "label": "aloeveraforever"
+    },
+    {
+      "domain": "www.ghaloe.com",
+      "label": "ghaloe"
+    }
   ],
   "suggest": {
     "everyDays": 7,
@@ -22,7 +34,21 @@
       "f15 forever"
     ],
     "expandAlphabet": true,
-    "questionPrefixes": ["comment", "pourquoi", "quel", "est-ce que"]
+    "questionPrefixes": [
+      "comment",
+      "pourquoi",
+      "quel",
+      "est-ce que"
+    ]
   },
-  "frozenPages": []
+  "frozenPages": [
+    "/",
+    "/blog/aloe-vera-stress-sommeil-naturel/",
+    "/blog/forever-living-avis-produits-france/",
+    "/blog/c9-forever-avis/",
+    "/produits/",
+    "/blog/forever-freedom-aloe-vera-articulations-mobilite/",
+    "/produits/forever-freedom-confort-articulaire/"
+  ],
+  "_frozenPagesNote": "Pages en fenêtre de mesure (modifiées du 13 au 20/11/2026). Bilan prévu le 9/12/2026, puis vider la liste."
 }

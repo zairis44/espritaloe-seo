@@ -1,55 +1,69 @@
 {
-  "_aide": "Mots-clés suivis, rangés par groupe. Ajoute ou retire des lignes librement. La correspondance avec la Search Console ignore les majuscules et les accents.",
+  "_aide": "Mots-clés suivis, rangés par groupe (liste refaite le 20/11/2026 à partir des vraies requêtes Search Console). La correspondance ignore majuscules, accents, tirets et apostrophes.",
   "groups": [
     {
-      "name": "Fiabilité et avis",
+      "name": "Fiabilité, danger, avis",
       "keywords": [
+        "les produits forever sont-ils dangereux",
+        "les produits forever sont ils fiables",
+        "forever avis négatif",
+        "forever living products avis négatif",
+        "produits forever avis médical",
+        "forever living avis médecin",
+        "forever avis",
         "forever living avis",
-        "avis produits forever",
-        "forever living danger",
-        "produits forever fiables",
-        "forever living arnaque",
-        "aloe vera forever avis"
+        "forever complément alimentaire avis"
       ]
     },
     {
       "name": "Programme C9",
       "keywords": [
         "c9 forever avis",
-        "programme c9 forever",
-        "c9 forever prix",
-        "c9 forever perte de poids",
+        "c9 forever avis médical",
+        "cure c9 forever avis",
         "c9 forever avis négatif"
       ]
     },
     {
-      "name": "Devenir distributeur",
+      "name": "Acheter Forever en France",
       "keywords": [
-        "devenir distributeur forever",
-        "distributeur forever living",
-        "forever living franchise",
-        "forever living pyramidal",
-        "distributeur forever suisse",
-        "distributeur forever belgique"
+        "forever living france",
+        "boutique forever living france",
+        "forever living acheter",
+        "acheter produits forever living",
+        "forever living products france",
+        "produits forever living france",
+        "forever commande en ligne"
       ]
     },
     {
       "name": "Produits",
       "keywords": [
-        "aloe vera gel forever",
-        "boisson aloe vera",
-        "pulpe aloe vera à boire",
-        "aloe gelly forever",
-        "déodorant forever aloe",
-        "shampoing aloe vera forever",
-        "aloe cooling lotion"
+        "forever freedom posologie",
+        "forever freedom effet secondaire",
+        "forever therm avis",
+        "forever aloe vera gel",
+        "pulpe d aloe vera",
+        "boire aloe vera avant de dormir"
       ]
     },
     {
-      "name": "Local",
+      "name": "Devenir distributeur",
       "keywords": [
-        "distributeur forever loire-atlantique",
-        "forever living nantes"
+        "franchise foreverliving",
+        "distributeur forever",
+        "distributeur forever living france",
+        "vdi aloe vera",
+        "vente a domicile aloe vera"
+      ]
+    },
+    {
+      "name": "Aloe vera : santé et usages",
+      "keywords": [
+        "aloe vera danger pour la peau",
+        "gel aloe vera à boire danger",
+        "aloe vera constipation",
+        "comment utiliser l aloe vera pour l estomac"
       ]
     }
   ]

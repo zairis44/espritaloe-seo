@@ -27,7 +27,7 @@ export function dayRange(start: string, end: string) {
   return out;
 }
 export function norm(s: string) {
-  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’']/g, ' ').replace(/\s+/g, ' ').trim();
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[’'\-]/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
 // ---------- configuration ----------

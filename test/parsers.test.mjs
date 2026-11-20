@@ -49,6 +49,7 @@ test('normalisation des requêtes', () => {
   assert.equal(norm('  Déodorant  FOREVER   Aloe '), 'deodorant forever aloe');
   assert.equal(norm("c9 forever avis négatif"), norm('C9 Forever Avis Negatif'));
   assert.equal(norm("l'aloe vera"), 'l aloe vera');
+  assert.equal(norm('sont-ils dangereux'), norm('sont ils dangereux'));
 });
 
 test('dates', () => {

@@ -370,3 +370,38 @@ export const competitors = (settings.competitors || []).map((c) => {
     removed,
   };
 });
+
+// ---------- indexation (URL Inspection API) ----------
+interface PageIndex {
+  verdict: string | null;
+  etat: string | null;
+  indexation: string | null;
+  robots: string | null;
+  recup: string | null;
+  dernierCrawl: string | null;
+  canoniqueGoogle: string | null;
+  canoniqueDeclaree: string | null;
+  erreur?: string;
+}
+const indexRaw = readJson<{ date?: string; pages: Record<string, PageIndex>; changements: [string, string, string, string][] }>(
+  path.join(DATA_DIR, 'gsc', 'indexation.json'),
+  { pages: {}, changements: [] }
+);
+export const indexation = (() => {
+  const pages = Object.entries(indexRaw.pages).map(([url, p]) => ({
+    url,
+    ...p,
+    // Google a retenu une autre page comme version principale
+    canoniqueDifferente: !!p.canoniqueGoogle && !!p.canoniqueDeclaree && p.canoniqueGoogle !== p.canoniqueDeclaree,
+  }));
+  const nonIndexees = pages.filter((p) => p.verdict !== 'PASS').sort((a, b) => a.url.localeCompare(b.url));
+  return {
+    date: indexRaw.date ?? null,
+    total: pages.length,
+    indexees: pages.length - nonIndexees.length,
+    nonIndexees,
+    canoniques: pages.filter((p) => p.canoniqueDifferente),
+    changements: [...indexRaw.changements].reverse().slice(0, 20),
+    pages: pages.sort((a, b) => a.url.localeCompare(b.url)),
+  };
+})();

@@ -1,0 +1,69 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { indexation as ix, shortUrl, isFrozen } from '../lib/data';
+import { day } from '../lib/format';
+const libelle = (v: string | null) => (v === 'PASS' ? 'Indexée' : v === 'NEUTRAL' ? 'Exclue' : v === 'FAIL' ? 'Erreur' : 'Inconnu');
+---
+<Layout title="Indexation Google">
+  {!ix.date ? (
+    <p class="muted">Pas encore de contrôle : il a lieu chaque nuit, avec la collecte.</p>
+  ) : (
+    <>
+      <p class="muted small">
+        État de chaque page du sitemap dans l'index Google, d'après l'outil d'inspection d'URL de la Search Console. Contrôle du {day(ix.date)}
+      </p>
+      <section class="kpis">
+        <div class="card kpi"><span class="small muted">Pages contrôlées</span><strong>{ix.total}</strong></div>
+        <div class="card kpi"><span class="small muted">Indexées</span><strong class="up">{ix.indexees}</strong></div>
+        <div class="card kpi"><span class="small muted">Non indexées</span><strong class:list={{ down: ix.nonIndexees.length > 0 }}>{ix.nonIndexees.length}</strong></div>
+        <div class="card kpi"><span class="small muted">Autre canonique</span><strong class:list={{ warn: ix.canoniques.length > 0 }}>{ix.canoniques.length}</strong></div>
+      </section>
+
+      <section class="card">
+        <h2>🔴 Pages absentes de Google <span class="muted small">({ix.nonIndexees.length})</span></h2>
+        {ix.nonIndexees.length ? (
+          <ul class="list stack">
+            {ix.nonIndexees.map((p) => (
+              <li>
+                <div class="path"><a href={p.url} target="_blank" rel="noopener">{shortUrl(p.url)}</a>{isFrozen(p.url) && <span class="badge">gelée</span>}</div>
+                <div class="small muted">{libelle(p.verdict)} · {p.etat ?? '–'}{p.dernierCrawl && ` · dernier passage de Google le ${day(p.dernierCrawl, true)}`}</div>
+              </li>
+            ))}
+          </ul>
+        ) : <p class="up">Toutes les pages du sitemap sont indexées.</p>}
+      </section>
+
+      {ix.canoniques.length > 0 && (
+        <section class="card">
+          <h2>🟠 Google a choisi une autre page <span class="muted small">({ix.canoniques.length})</span></h2>
+          <p class="muted small">La page déclare sa propre adresse comme principale, mais Google en retient une autre : c'est souvent un signe de doublon ou de cannibalisation.</p>
+          <ul class="list stack">
+            {ix.canoniques.map((p) => (
+              <li><div class="path">{shortUrl(p.url)}</div><div class="small muted">Google retient : {p.canoniqueGoogle ? shortUrl(p.canoniqueGoogle) : '–'}</div></li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {ix.changements.length > 0 && (
+        <section class="card">
+          <h2>Changements récents</h2>
+          <ul class="list">
+            {ix.changements.map(([d, url, avant, apres]) => (
+              <li><span class="path">{shortUrl(url)}</span><span class:list={['nowrap small', apres === 'PASS' ? 'up' : 'down']}>{libelle(avant)} → {libelle(apres)} · {day(d)}</span></li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <details class="card">
+        <summary>Toutes les pages ({ix.total})</summary>
+        <ul class="list">
+          {ix.pages.map((p) => (
+            <li><span class="path">{shortUrl(p.url)}</span><span class:list={['nowrap small', p.verdict === 'PASS' ? 'up' : 'down']}>{libelle(p.verdict)}</span></li>
+          ))}
+        </ul>
+      </details>
+    </>
+  )}
+</Layout>

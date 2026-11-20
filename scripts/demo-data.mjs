@@ -134,6 +134,13 @@ const items = Object.fromEntries(sugg.map((s) => [s, [s.split(' ').slice(0, 2).j
 writeJson(path.join(dir, 'suggest', 'latest.json'), { date: addDays(today, -3), items });
 writeJson(path.join(dir, 'suggest', 'seen.json'), Object.fromEntries(sugg.map((s, i) => [s.normalize('NFD').replace(/[̀-ͯ]/g, ''), i % 5 === 0 ? addDays(today, -3) : `${addDays(today, -40)}*`])));
 
+// Indexation
+const ixPages = {};
+for (const [pg] of pages) ixPages[SITE + pg] = { verdict: 'PASS', etat: 'Envoyée et indexée', indexation: 'INDEXING_ALLOWED', robots: 'ALLOWED', recup: 'SUCCESSFUL', dernierCrawl: addDays(today, -5), canoniqueGoogle: SITE + pg, canoniqueDeclaree: SITE + pg };
+ixPages[SITE + '/blog/c9-forever-avis/'] = { ...ixPages[SITE + '/blog/c9-forever-avis/'], verdict: 'NEUTRAL', etat: 'Explorée, actuellement non indexée', dernierCrawl: addDays(today, -21) };
+ixPages[SITE + '/recettes-c9/'].canoniqueGoogle = SITE + '/produits/programme-c9/';
+writeJson(path.join(dir, 'gsc', 'indexation.json'), { date: today, pages: ixPages, changements: [[addDays(today, -3), SITE + '/blog/c9-forever-avis/', 'PASS', 'NEUTRAL']] });
+
 writeJson(path.join(dir, 'meta.json'), {
   lastRun: new Date().toISOString(),
   steps: {

@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { kpis, totalsSeries, weeklyClicks, pages28, concentration, movers, competitors, ideas, suggest, shortUrl, isFrozen, hasGsc } from '../lib/data';
+import { kpis, totalsSeries, weeklyClicks, pages28, concentration, movers, competitors, ideas, suggest, indexation, shortUrl, isFrozen, hasGsc } from '../lib/data';
 import { int, pos, pct, change, delta, day, linePath } from '../lib/format';
 
 const W = 600, H = 150;
@@ -100,6 +100,18 @@ const ideaCount = ideas.page2.length + ideas.lowCtr.length + ideas.cannibal.leng
         </ul>
       </section>
     </>
+  )}
+
+  {indexation.date && (
+    <a class:list={['card link', { alert: indexation.nonIndexees.length > 0 }]} href="/indexation">
+      <h2>Indexation Google</h2>
+      <p>
+        <strong>{indexation.indexees}</strong> pages indexées sur {indexation.total}.
+        {indexation.nonIndexees.length > 0
+          ? ` ${indexation.nonIndexees.length} absente${indexation.nonIndexees.length > 1 ? 's' : ''} de Google : voir le détail.`
+          : ' Tout est dans Google.'}
+      </p>
+    </a>
   )}
 
   <section class="grid2">

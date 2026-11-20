@@ -63,6 +63,11 @@ p(`### Google Suggest (relevé ${d.suggest.date ?? '–'}) : ${d.suggest.fresh.l
 if (d.suggest.fresh.length) p(`Nouvelles : ${d.suggest.fresh.map((s) => s.text).join(' · ')}`);
 p(`Non couvertes (extrait) : ${d.suggest.gaps.slice(0, 40).map((s) => s.text).join(' · ')}`);
 
+p(`\n## Indexation Google (contrôle du ${d.indexation.date ?? '–'}) : ${d.indexation.indexees}/${d.indexation.total} indexées`);
+for (const x of d.indexation.nonIndexees) p(`- NON INDEXÉE ${d.shortUrl(x.url)} : ${x.etat ?? x.verdict} (dernier crawl ${x.dernierCrawl ?? '–'})`);
+for (const x of d.indexation.canoniques) p(`- CANONIQUE ${d.shortUrl(x.url)} → Google retient ${x.canoniqueGoogle}`);
+for (const [j, u, a, b] of d.indexation.changements.slice(0, 10)) p(`- changement ${j} ${d.shortUrl(u)} : ${a} → ${b}`);
+
 p('\n## Concurrents');
 for (const c of d.competitors) {
   if (!c.ok) { p(`- ${c.label} : ${c.error}`); continue; }

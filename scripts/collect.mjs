@@ -8,6 +8,7 @@
 import path from 'node:path';
 import { ROOT, readJson, writeJson, isoDay, loadEnvLocal } from './lib/util.mjs';
 import { collectGsc } from './lib/gsc.mjs';
+import { collectIndexation } from './lib/indexation.mjs';
 import { collectCompetitor } from './lib/sitemaps.mjs';
 import { collectSuggest, isDue } from './lib/suggest.mjs';
 
@@ -45,6 +46,10 @@ if (wants('gsc')) {
   } else {
     await step('gsc', () => collectGsc({ settings, dataDir, env, log }));
   }
+}
+
+if (wants('indexation') && process.env.GOOGLE_REFRESH_TOKEN) {
+  await step('indexation', () => collectIndexation({ settings, dataDir, env: process.env, today, log }));
 }
 
 if (wants('competitors')) {

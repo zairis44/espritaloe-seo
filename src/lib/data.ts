@@ -53,7 +53,9 @@ export const meta = readJson<{ lastRun?: string; steps: Record<string, { status:
 export function shortUrl(url: string) {
   try {
     const u = new URL(url);
-    return decodeURIComponent(u.pathname + u.search) || '/';
+    const path = decodeURIComponent(u.pathname + u.search) || '/';
+    // Une variante d'hôte (ex. www.) est signalée pour ne pas confondre deux lignes « / »
+    return settings.siteDomain && u.hostname !== settings.siteDomain && u.hostname.endsWith(settings.siteDomain) ? `${u.hostname}${path}` : path;
   } catch {
     return url;
   }

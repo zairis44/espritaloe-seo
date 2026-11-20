@@ -105,7 +105,7 @@ async function crawlSitemaps(roots, log) {
 /**
  * Met à jour data/competitors/<domaine>.json.
  * Format : { domain, label, baselineDate, lastCheck, sitemaps, errors, history: [[jour, total, nouvelles, retirées]],
- *            urls: { url: { f: premier vu, m: lastmod, t?: titre, g?: disparue le } } }
+ *            urls: { url: { f: premier vu, m: lastmod, b?: relevé initial, t?: titre, g?: disparue le } } }
  */
 export async function collectCompetitor({ competitor, dataDir, today, log }) {
   const { domain, label } = competitor;
@@ -126,7 +126,8 @@ export async function collectCompetitor({ competitor, dataDir, today, log }) {
   for (const [loc, u] of urls) {
     const cur = store.urls[loc];
     if (!cur) {
-      store.urls[loc] = { f: today, m: u.lastmod };
+      // b = page présente lors du relevé initial (ne compte pas comme « nouvelle »)
+      store.urls[loc] = baseline ? { f: today, m: u.lastmod, b: 1 } : { f: today, m: u.lastmod };
       if (!baseline) fresh.push(loc);
     } else {
       cur.m = u.lastmod || cur.m;

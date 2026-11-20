@@ -11,9 +11,10 @@ export async function getAccessToken({ clientId, clientSecret, refreshToken }) {
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
-      refresh_token: refreshToken,
+      // trim() : un espace ou un retour à la ligne collé avec le secret suffit à tout bloquer
+      client_id: clientId.trim(),
+      client_secret: clientSecret.trim(),
+      refresh_token: refreshToken.trim(),
       grant_type: 'refresh_token',
     }),
   });
@@ -23,6 +24,11 @@ export async function getAccessToken({ clientId, clientSecret, refreshToken }) {
       throw new Error(
         "Jeton Google expiré ou révoqué. Relance « npm run auth » sur ton ordinateur et remplace le secret GOOGLE_REFRESH_TOKEN dans GitHub. " +
           "Si ça se reproduit chaque semaine, ton application OAuth est restée en mode « Test » : passe-la « En production » (voir le README)."
+      );
+    }
+    if (json.error === 'invalid_client') {
+      throw new Error(
+        "Google ne reconnaît pas l'identifiant client : vérifie le secret GOOGLE_CLIENT_ID (il doit se terminer par .apps.googleusercontent.com) et GOOGLE_CLIENT_SECRET (il commence par GOCSPX-)."
       );
     }
     throw new Error(`Connexion Google refusée (${res.status}) : ${json.error_description || json.error || 'erreur inconnue'}`);

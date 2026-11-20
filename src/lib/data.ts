@@ -328,7 +328,7 @@ interface CompStore {
   lastCheck: string;
   errors?: string[];
   history: [string, number, number, number][];
-  urls: Record<string, { f: string; m: string | null; t?: string; g?: string }>;
+  urls: Record<string, { f: string; m: string | null; b?: 1; t?: string; g?: string }>;
 }
 export const competitors = (settings.competitors || []).map((c) => {
   const s = readJson<CompStore | null>(path.join(DATA_DIR, 'competitors', `${c.domain}.json`), null);
@@ -339,7 +339,7 @@ export const competitors = (settings.competitors || []).map((c) => {
   const entries = Object.entries(s.urls);
   const live = entries.filter(([, u]) => !u.g);
   const newPages = entries
-    .filter(([, u]) => u.f > s.baselineDate && u.f >= since30)
+    .filter(([, u]) => !u.b && u.f >= since30)
     .map(([url, u]) => ({ url, first: u.f, title: u.t ?? null, gone: u.g ?? null }))
     .sort((a, b) => b.first.localeCompare(a.first));
   const updated = live

@@ -1,0 +1,21 @@
+---
+import { linePath } from '../lib/format';
+interface Props {
+  values: (number | null)[];
+  /** true pour les positions : plus bas = meilleur, donc affiché en haut */
+  invert?: boolean;
+  width?: number;
+  height?: number;
+  label?: string;
+}
+const { values, invert = false, width = 96, height = 26, label = '' } = Astro.props;
+const d = linePath(values, width, height, { invert });
+const points = values.filter((v) => v != null).length;
+---
+{points >= 2 ? (
+  <svg class="spark" viewBox={`0 0 ${width} ${height}`} width={width} height={height} role="img" aria-label={label}>
+    <path d={d} fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" />
+  </svg>
+) : (
+  <span class="muted small">{points === 1 ? '1 jour' : '—'}</span>
+)}

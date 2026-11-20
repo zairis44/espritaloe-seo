@@ -1,0 +1,28 @@
+---
+import Layout from '../layouts/Layout.astro';
+import KeywordTable from '../components/KeywordTable.astro';
+import { trackedGroups, topQueries, hasGsc } from '../lib/data';
+---
+<Layout title="Positions">
+  <p class="muted small">
+    Positions moyennes Google (Search Console), tous pays et tous appareils confondus. « Évol. » compare les 7 derniers jours aux 7 précédents :
+    <span class="up">▲</span> = tu gagnes des places. « Pas visible » : aucune impression sur 28 jours, donc au-delà de la 10e page ou absent.
+  </p>
+
+  {trackedGroups.map((g) => (
+    <section class="card">
+      <h2>{g.name}</h2>
+      <KeywordTable rows={g.rows} />
+    </section>
+  ))}
+
+  {hasGsc && (
+    <section class="card">
+      <h2>Toutes tes requêtes <span class="muted small">({topQueries.length} premières par impressions)</span></h2>
+      <input type="search" class="filter" placeholder="Filtrer (ex. c9, avis, gel…)" data-filter="#all-queries" />
+      <div id="all-queries"><KeywordTable rows={topQueries} filterable /></div>
+    </section>
+  )}
+
+  <p class="muted small">Pour suivre une nouvelle requête, ajoute-la dans <code>config/keywords.json</code> : elle apparaît au prochain build, avec son historique.</p>
+</Layout>

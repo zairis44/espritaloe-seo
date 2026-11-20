@@ -1,0 +1,24 @@
+{
+  "name": "espritaloe-seo",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Tableau de bord SEO privé pour espritaloe.fr : positions, concurrents, idées d'articles",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "auth": "node scripts/auth.mjs",
+    "collect": "node scripts/collect.mjs",
+    "demo": "node scripts/demo-data.mjs dev",
+    "demo:build": "node scripts/demo-data.mjs build",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@vercel/functions": "^3.11.3",
+    "astro": "^7.4.13"
+  }
+}

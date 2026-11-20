@@ -1,0 +1,56 @@
+{
+  "_aide": "Mots-clés suivis, rangés par groupe. Ajoute ou retire des lignes librement. La correspondance avec la Search Console ignore les majuscules et les accents.",
+  "groups": [
+    {
+      "name": "Fiabilité et avis",
+      "keywords": [
+        "forever living avis",
+        "avis produits forever",
+        "forever living danger",
+        "produits forever fiables",
+        "forever living arnaque",
+        "aloe vera forever avis"
+      ]
+    },
+    {
+      "name": "Programme C9",
+      "keywords": [
+        "c9 forever avis",
+        "programme c9 forever",
+        "c9 forever prix",
+        "c9 forever perte de poids",
+        "c9 forever avis négatif"
+      ]
+    },
+    {
+      "name": "Devenir distributeur",
+      "keywords": [
+        "devenir distributeur forever",
+        "distributeur forever living",
+        "forever living franchise",
+        "forever living pyramidal",
+        "distributeur forever suisse",
+        "distributeur forever belgique"
+      ]
+    },
+    {
+      "name": "Produits",
+      "keywords": [
+        "aloe vera gel forever",
+        "boisson aloe vera",
+        "pulpe aloe vera à boire",
+        "aloe gelly forever",
+        "déodorant forever aloe",
+        "shampoing aloe vera forever",
+        "aloe cooling lotion"
+      ]
+    },
+    {
+      "name": "Local",
+      "keywords": [
+        "distributeur forever loire-atlantique",
+        "forever living nantes"
+      ]
+    }
+  ]
+}

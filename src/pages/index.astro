@@ -1,0 +1,125 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { kpis, totalsSeries, weeklyClicks, pages28, concentration, movers, competitors, ideas, suggest, shortUrl, isFrozen, hasGsc } from '../lib/data';
+import { int, pos, pct, change, delta, day, linePath } from '../lib/format';
+
+const W = 600, H = 150;
+const clicks = totalsSeries.map((d) => d.clicks);
+const maxClicks = Math.max(1, ...clicks);
+const line = linePath(clicks, W, H, { min: 0, max: maxClicks, pad: 4 });
+const area = line ? `${line}L${W - 4},${H - 4}L4,${H - 4}Z` : '';
+
+const wk = weeklyClicks.slice(-52).map((w) => w.clicks);
+const wkMax = Math.max(1, ...wk);
+
+const cards = kpis
+  ? [
+      { label: 'Clics', value: int(kpis.cur.clicks), ch: change(kpis.cur.clicks, kpis.prev.clicks) },
+      { label: 'Impressions', value: int(kpis.cur.impressions), ch: change(kpis.cur.impressions, kpis.prev.impressions) },
+      { label: 'CTR', value: pct(kpis.cur.ctr), ch: change(kpis.cur.ctr, kpis.prev.ctr) },
+      { label: 'Position moy.', value: pos(kpis.cur.position), ch: change(kpis.cur.position, kpis.prev.position, true) },
+    ]
+  : [];
+const shareCls = concentration.topShare >= 0.6 ? 'down' : concentration.topShare >= 0.4 ? 'warn' : 'up';
+const ideaCount = ideas.page2.length + ideas.lowCtr.length + ideas.cannibal.length;
+---
+<Layout title="Vue d’ensemble">
+  {hasGsc && kpis && (
+    <>
+      <p class="muted small">28 derniers jours, comparés aux 28 jours précédents.</p>
+      <section class="kpis">
+        {cards.map((c) => (
+          <div class="card kpi">
+            <span class="small muted">{c.label}</span>
+            <strong>{c.value}</strong>
+            <span class:list={['small', c.ch.cls]}>{c.ch.text}</span>
+          </div>
+        ))}
+      </section>
+
+      <section class="card">
+        <h2>Clics par jour <span class="muted small">(90 jours)</span></h2>
+        <svg class="chart" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label="Clics par jour sur 90 jours">
+          <path d={area} class="area" />
+          <path d={line} class="line" vector-effect="non-scaling-stroke" />
+        </svg>
+        <div class="axis small muted">
+          <span>{day(totalsSeries[0]?.day)}</span>
+          <span>max {int(maxClicks)} / jour</span>
+          <span>{day(totalsSeries.at(-1)?.day)}</span>
+        </div>
+      </section>
+
+      {wk.length > 8 && (
+        <section class="card">
+          <h2>Clics par semaine <span class="muted small">({wk.length} semaines)</span></h2>
+          <div class="bars" role="img" aria-label="Clics par semaine">
+            {wk.map((v) => <span style={`height:${Math.max(2, (v / wkMax) * 100)}%`} title={int(v)}></span>)}
+          </div>
+        </section>
+      )}
+
+      <section class="grid2">
+        <div class="card">
+          <h2>Ça monte</h2>
+          {movers.up.length ? (
+            <ul class="list">
+              {movers.up.map((m) => (
+                <li><span>{m.keyword}</span><span class="nowrap"><span class="muted">{pos(m.pos7)}</span> <span class="up">{delta(m.delta7).text}</span></span></li>
+              ))}
+            </ul>
+          ) : <p class="muted">Rien de marquant cette semaine.</p>}
+        </div>
+        <div class="card">
+          <h2>Ça descend</h2>
+          {movers.down.length ? (
+            <ul class="list">
+              {movers.down.map((m) => (
+                <li><span>{m.keyword}</span><span class="nowrap"><span class="muted">{pos(m.pos7)}</span> <span class="down">{delta(m.delta7).text}</span></span></li>
+              ))}
+            </ul>
+          ) : <p class="muted">Rien de marquant cette semaine.</p>}
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Pages qui apportent les clics</h2>
+        {concentration.top && (
+          <p>
+            La première page fait <strong class={shareCls}>{pct(concentration.topShare, 0)}</strong> des clics.
+            {concentration.topShare >= 0.6 && ' Le trafic dépend presque d’une seule page : la priorité reste d’en faire monter une deuxième.'}
+          </p>
+        )}
+        <ul class="list">
+          {pages28.slice(0, 8).map((p) => (
+            <li>
+              <span class="path">{shortUrl(p.key)}{isFrozen(p.key) && <span class="badge">gelée</span>}</span>
+              <span class="nowrap">{int(p.clicks)} <span class="muted small">clics · pos. {pos(p.position)}</span></span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </>
+  )}
+
+  <section class="grid2">
+    <a class="card link" href="/concurrents">
+      <h2>Concurrents</h2>
+      <ul class="list">
+        {competitors.map((c) => (
+          <li><span>{c.label}</span><span class="nowrap">{c.ok ? <>{c.new7 > 0 ? <strong class="warn">+{c.new7} page{c.new7 > 1 ? 's' : ''}</strong> : <span class="muted">rien de neuf</span>}<span class="muted small"> · 7 j</span></> : (c.pending ? <span class="muted small">en attente</span> : <span class="down small">erreur</span>)}</span></li>
+        ))}
+      </ul>
+    </a>
+    <a class="card link" href="/idees">
+      <h2>Idées</h2>
+      <ul class="list">
+        <li><span>Requêtes en page 2</span><strong>{ideas.page2.length}</strong></li>
+        <li><span>Titres à retravailler (CTR faible)</span><strong>{ideas.lowCtr.length}</strong></li>
+        <li><span>Pages en concurrence</span><strong>{ideas.cannibal.length}</strong></li>
+        <li><span>Suggestions Google non couvertes</span><strong>{suggest.gaps.length}</strong></li>
+      </ul>
+      {ideaCount === 0 && !hasGsc && <p class="muted small">Les trois premières lignes se rempliront avec la Search Console.</p>}
+    </a>
+  </section>
+</Layout>

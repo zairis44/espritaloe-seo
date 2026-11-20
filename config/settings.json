@@ -1,0 +1,28 @@
+{
+  "gscProperty": "sc-domain:espritaloe.fr",
+  "siteDomain": "espritaloe.fr",
+  "historyDays": 480,
+  "queryHistoryDays": 90,
+  "competitors": [
+    { "domain": "www.aloe-vera-pour-tous.com", "label": "aloe-vera-pour-tous" },
+    { "domain": "aloeveragel.fr", "label": "aloeveragel" },
+    { "domain": "www.aloeveraforever.fr", "label": "aloeveraforever" },
+    { "domain": "www.ghaloe.com", "label": "ghaloe" }
+  ],
+  "suggest": {
+    "everyDays": 7,
+    "seeds": [
+      "aloe vera",
+      "forever living",
+      "c9 forever",
+      "gel aloe vera",
+      "aloe vera à boire",
+      "distributeur forever",
+      "aloe gelly",
+      "f15 forever"
+    ],
+    "expandAlphabet": true,
+    "questionPrefixes": ["comment", "pourquoi", "quel", "est-ce que"]
+  },
+  "frozenPages": []
+}

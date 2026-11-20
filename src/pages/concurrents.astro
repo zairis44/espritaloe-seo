@@ -1,0 +1,75 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { competitors, shortUrl } from '../lib/data';
+import { day, int } from '../lib/format';
+---
+<Layout title="Concurrents">
+  <p class="muted small">
+    Surveillance des sitemaps : nouvelles pages publiées et pages mises à jour. Les positions des concurrents viendront avec DataForSEO ;
+    en attendant, demande-moi une analyse Semrush ponctuelle.
+  </p>
+
+  {competitors.map((c) => (
+    <section class="card">
+      <h2><a href={`https://${c.domain}`} target="_blank" rel="noopener noreferrer">{c.label}</a></h2>
+      {!c.ok ? (
+        <p class="down">Pas de données : {c.error}</p>
+      ) : (
+        <>
+          {c.stale && <p class="warn small">Dernière collecte en échec ({c.stale}) : données du {day(c.lastCheck)}</p>}
+          <div class="stats">
+            <div><strong>{int(c.total)}</strong><span class="small muted">pages</span></div>
+            <div><strong class:list={{ warn: c.newPages.length > 0 }}>{c.newPages.length}</strong><span class="small muted">nouvelles (30 j)</span></div>
+            <div><strong>{c.updated.length}</strong><span class="small muted">mises à jour (30 j)</span></div>
+            <div><strong>{c.removed}</strong><span class="small muted">retirées (30 j)</span></div>
+          </div>
+
+          <h3>Activité par semaine <span class="muted small">(dates de modification du sitemap, 12 semaines)</span></h3>
+          {(() => {
+            const max = Math.max(1, ...c.weeks.map((w) => w.count));
+            return (
+              <div class="bars small-bars" role="img" aria-label="Pages modifiées par semaine">
+                {c.weeks.map((w) => <span style={`height:${Math.max(2, (w.count / max) * 100)}%`} title={`Semaine du ${day(w.start)} : ${w.count}`}></span>)}
+              </div>
+            );
+          })()}
+
+          {c.newPages.length > 0 ? (
+            <>
+              <h3>Nouvelles pages</h3>
+              <ul class="list">
+                {c.newPages.slice(0, 15).map((p) => (
+                  <li>
+                    <a href={p.url} target="_blank" rel="noopener noreferrer" class="ellipsis">{p.title || shortUrl(p.url)}</a>
+                    <span class="muted small nowrap">{day(p.first)}{p.gone && ' · retirée'}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p class="muted small">
+              {c.baselineDate === c.lastCheck
+                ? `Premier relevé le ${day(c.baselineDate)} : les nouvelles pages apparaîtront à partir de demain.`
+                : 'Aucune nouvelle page sur 30 jours.'}
+            </p>
+          )}
+
+          {c.updated.length > 0 && (
+            <details>
+              <summary>Pages mises à jour ({c.updated.length})</summary>
+              <ul class="list">
+                {c.updated.slice(0, 30).map((p) => (
+                  <li>
+                    <a href={p.url} target="_blank" rel="noopener noreferrer" class="ellipsis">{p.title || shortUrl(p.url)}</a>
+                    <span class="muted small nowrap">{day(p.lastmod)}</span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+          <p class="muted small">Suivi depuis le {day(c.baselineDate, true)} · vérifié le {day(c.lastCheck)}</p>
+        </>
+      )}
+    </section>
+  ))}
+</Layout>

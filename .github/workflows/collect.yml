@@ -1,0 +1,62 @@
+name: Collecte SEO
+
+on:
+  schedule:
+    # Chaque nuit à 4 h 37 UTC (5 h 37 en hiver, 6 h 37 en été à Paris)
+    - cron: '37 4 * * *'
+  workflow_dispatch: # bouton « Run workflow » pour lancer à la main
+  push:
+    # Collecte immédiate quand Claude modifie la configuration ou demande une collecte
+    branches: [main]
+    paths:
+      - 'config/**'
+      - '.github/collect-now'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: collecte
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Les scripts de collecte n'utilisent que Node : pas besoin de npm install
+      - name: Collecte
+        id: collect
+        continue-on-error: true
+        run: node scripts/collect.mjs
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+
+      # On enregistre ce qui a été collecté, même si une étape a échoué
+      - name: Enregistrer les données
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "Aucune donnée nouvelle"
+          else
+            git commit -m "data: collecte du $(date -u +%F)"
+            git pull --rebase origin ${{ github.ref_name }}
+            git push
+          fi
+
+      # Fait échouer le job (et t'envoie un e-mail GitHub) si une étape a planté
+      - name: Signaler un échec
+        if: steps.collect.outcome == 'failure'
+        run: |
+          echo "::error::Au moins une étape de collecte a échoué. Détail dans le journal « Collecte » ci-dessus et en haut du tableau de bord."
+          exit 1

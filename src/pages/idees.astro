@@ -1,0 +1,97 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { ideas, suggest, shortUrl, isFrozen, hasGsc } from '../lib/data';
+import { int, pos, pct, day } from '../lib/format';
+---
+<Layout title="Idées">
+  {hasGsc && (
+    <>
+      <section class="card">
+        <h2>🔴 Requêtes en page 2 <span class="muted small">({ideas.page2.length})</span></h2>
+        <p class="muted small">Positions 11 à 20 sur 28 jours. Google te juge déjà pertinent : un article dédié, une section en plus ou quelques liens internes peuvent suffire à passer en page 1.</p>
+        {ideas.page2.length ? (
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Requête</th><th class="num">Pos.</th><th class="num">Impr.</th><th class="hide-sm">Page actuelle</th></tr></thead>
+              <tbody>
+                {ideas.page2.map((r) => (
+                  <tr>
+                    <td>{r.keyword}</td>
+                    <td class="num strong">{pos(r.pos28)}</td>
+                    <td class="num">{int(r.impressions28)}</td>
+                    <td class="hide-sm path">{r.page ? shortUrl(r.page) : '–'}{r.page && isFrozen(r.page) && <span class="badge">gelée</span>}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : <p class="muted">Aucune pour l’instant.</p>}
+      </section>
+
+      <section class="card">
+        <h2>🟠 Titres à retravailler <span class="muted small">({ideas.lowCtr.length})</span></h2>
+        <p class="muted small">En page 1 mais avec un taux de clic inférieur à la moitié du repère habituel pour cette position. Le title ou la meta description ne donnent pas envie de cliquer. Les repères sont des ordres de grandeur.</p>
+        {ideas.lowCtr.length ? (
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Requête</th><th class="num">Pos.</th><th class="num">CTR</th><th class="num hide-sm">Repère</th><th class="hide-sm">Page</th></tr></thead>
+              <tbody>
+                {ideas.lowCtr.map((r) => (
+                  <tr>
+                    <td>{r.keyword}</td>
+                    <td class="num">{pos(r.pos28)}</td>
+                    <td class="num down">{pct(r.ctr28)}</td>
+                    <td class="num hide-sm muted">{pct(r.expected, 0)}</td>
+                    <td class="hide-sm path">{r.page ? shortUrl(r.page) : '–'}{r.page && isFrozen(r.page) && <span class="badge">gelée, ne pas toucher</span>}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : <p class="muted">Rien à signaler.</p>}
+      </section>
+
+      <section class="card">
+        <h2>🟠 Pages en concurrence <span class="muted small">({ideas.cannibal.length})</span></h2>
+        <p class="muted small">Plusieurs de tes pages se partagent la même requête. Choisis la page principale et renforce-la (liens internes vers elle, contenu fusionné ou mieux différencié).</p>
+        {ideas.cannibal.length ? (
+          <ul class="list stack">
+            {ideas.cannibal.map((c) => (
+              <li>
+                <div><strong>{c.query}</strong> <span class="muted small">· {int(c.impressions)} impr.</span></div>
+                <ul class="sub">
+                  {c.pages.map((p) => <li class="path">{shortUrl(p.page)} <span class="muted small">pos. {pos(p.position)} · {int(p.impressions)} impr.</span></li>)}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        ) : <p class="muted">Aucune.</p>}
+      </section>
+    </>
+  )}
+
+  <section class="card">
+    <h2>🟡 Suggestions Google <span class="muted small">{suggest.date ? `(relevé du ${day(suggest.date)}, ${suggest.total} suggestions)` : ''}</span></h2>
+    {!suggest.date ? (
+      <p class="muted">Pas encore de relevé (il a lieu une fois par semaine).</p>
+    ) : (
+      <>
+        {suggest.fresh.length > 0 && (
+          <>
+            <h3>Nouvelles depuis 2 semaines</h3>
+            <ul class="chips">{suggest.fresh.map((s) => <li class="new">{s.text}</li>)}</ul>
+          </>
+        )}
+        <h3>Recherches sur lesquelles tu n’apparais pas encore <span class="muted small">({suggest.gaps.length})</span></h3>
+        <p class="muted small">
+          Ce que les gens tapent dans Google et pour quoi tu n’as eu aucune impression en 90 jours. Les plus longues d’abord : ce sont les plus faciles à gagner.
+          {!hasGsc && ' Sans la Search Console, toutes les suggestions apparaissent ici.'}
+        </p>
+        <input type="search" class="filter" placeholder="Filtrer (ex. cheveux, danger, prix…)" data-filter="#gaps" />
+        <ul class="chips" id="gaps">
+          {suggest.gaps.map((s) => <li data-q={s.text} title={`Graine : ${s.seeds.join(', ')}`}>{s.text}</li>)}
+        </ul>
+      </>
+    )}
+  </section>
+</Layout>
